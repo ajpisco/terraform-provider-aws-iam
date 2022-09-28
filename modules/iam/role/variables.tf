@@ -15,9 +15,9 @@ variable "assumed_policy_json" {
 }
 
 variable "policies" {
-  type        = map(any)
+  type        = list(any)
   description = "Policies definition"
-  default     = {}
+  default     = []
 }
 
 variable "managed_policy_arns" {
