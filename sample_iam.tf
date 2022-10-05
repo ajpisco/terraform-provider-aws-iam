@@ -52,7 +52,7 @@ locals {
   }
 
   roles = {
-    "sample1" : {
+    "sample_role1" : {
       assumed_policy_json = data.aws_iam_policy_document.assumed_policy.json
 
       # Optional
@@ -64,7 +64,7 @@ locals {
         "arn:aws:iam::aws:policy/AutoScalingFullAccess"
       ]
     },
-    "sample2" : {
+    "sample_role2" : {
       assumed_policy_json = data.aws_iam_policy_document.assumed_policy.json
 
       # Optional
@@ -76,8 +76,37 @@ locals {
         "arn:aws:iam::aws:policy/AutoScalingFullAccess"
       ]
     },
-    "sample3" : {
+    "sample_role3" : {
       assumed_policy_json = data.aws_iam_policy_document.assumed_policy.json
+    }
+  }
+
+  groups = {
+    "sample_group1" : {
+      # Optional
+      path = "/pathone/"
+
+      # Optional
+      policies = ["policy_name1", "policy_name2", "policy_name3"]
+
+      # Optional
+      managed_policy_arns = [
+        "arn:aws:iam::aws:policy/SecretsManagerReadWrite",
+        "arn:aws:iam::aws:policy/AutoScalingFullAccess"
+      ]
+    },
+    "sample_group2" : {
+
+      # Optional
+      policies = ["policy_name11", "policy_name2", "policy_name3"]
+
+      # Optional
+      managed_policy_arns = [
+        "arn:aws:iam::aws:policy/SecretsManagerReadWrite",
+        "arn:aws:iam::aws:policy/AutoScalingFullAccess"
+      ]
+    },
+    "sample_group3" : {
     }
   }
 
@@ -107,10 +136,29 @@ module "sample_iam_roles" {
   ]
 }
 
+module "sample_iam_groups" {
+  for_each = local.groups
+  source   = "./modules/iam/group"
+
+  name = each.key
+
+  path = lookup(each.value, "path", null)
+  policies            = lookup(each.value, "policies", [])
+  managed_policy_arns = lookup(each.value, "managed_policy_arns", [])
+
+  depends_on = [
+    module.sample_iam_policies
+  ]
+}
+
 output "created_policies" {
   value = [for policy in module.sample_iam_policies : policy.name]
 }
 
 output "created_roles" {
   value = [for role in module.sample_iam_roles : role.name]
+}
+
+output "created_groups" {
+  value = [for group in module.sample_iam_groups : group.name]
 }
